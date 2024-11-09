@@ -3,6 +3,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from colors import *
 import time
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+from skopt import BayesSearchCV
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.metrics import confusion_matrix
+
 
 def read_csv(file):
     return pd.read_csv(file)
@@ -111,7 +117,11 @@ def perform_grid_search_on_hyperparameters(param_grid, model, X_train, y_train,
     
     if search == 'Grid':
 
-        hyper_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=5, n_jobs=-1, verbose=2)
+        hyper_search = GridSearchCV(estimator=model, 
+                                    param_grid=param_grid, 
+                                    cv=5, 
+                                    n_jobs=-1, 
+                                    verbose=2)
 
     elif search == 'Random':
         hyper_search = RandomizedSearchCV(estimator=model, param_distributions=param_dist, 
@@ -119,7 +129,7 @@ def perform_grid_search_on_hyperparameters(param_grid, model, X_train, y_train,
                                           random_state=42)
         
     elif search == 'Bayes':
-        hyper_search = _search = BayesSearchCV(estimator=model, search_spaces=param_dist, 
+        hyper_search = BayesSearchCV(estimator=model, search_spaces=param_dist, 
                                                n_iter=32, cv=5, n_jobs=-1, verbose=2,
                                                random_state=42)
         
@@ -138,4 +148,8 @@ def perform_grid_search_on_hyperparameters(param_grid, model, X_train, y_train,
     print(f'Total Time for grid search is: {hr} hr, {minutes} min, {seconds}s')
     print("Best parameters found: ", hyper_search.best_params_)
     print("Best cross-validation score: ", hyper_search.best_score_) 
+
+    return hyper_search.best_params_, hyper_search.best_score_
+
+
 
